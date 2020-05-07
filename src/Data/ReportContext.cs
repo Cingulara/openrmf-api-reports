@@ -25,5 +25,13 @@ namespace openrmf_report_api.Data
                 return _database.GetCollection<NessusPatchData>("ACASScanReport");
             }
         }
+
+        public IMongoCollection<VulnerabilityReport> VulnerabilityReports
+        {
+            get
+            {
+                return _database.GetCollection<VulnerabilityReport>("VulnerabilityReport");
+            }
+        }
     }
 }

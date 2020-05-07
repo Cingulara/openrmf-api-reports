@@ -44,6 +44,17 @@ namespace openrmf_report_api.Data {
                 throw ex;
             }
         }
+        public async Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityData(string systemGroupId, string vulnid){
+            try
+            {
+                return await _context.VulnerabilityReports.Find(v => v.vulnid == vulnid && v.systemGroupId == systemGroupId).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                // log or manage the exception
+                throw ex;
+            }
+        }
 
         // check that the database is responding and it returns at least one collection name
         public bool HealthStatus(){
