@@ -1,3 +1,5 @@
+![.NET Core Build and Test](https://github.com/Cingulara/openrmf-api-reports/workflows/.NET%20Core%20Build%20and%20Test/badge.svg)
+
 # openrmf-api-report
 This is the OpenRMF Reports API for running reports with data formatted for quick querying.
 
