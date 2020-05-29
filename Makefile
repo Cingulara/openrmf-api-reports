@@ -1,5 +1,5 @@
-VERSION ?= 0.14.01
-NAME ?= "openrmf-api-reports"
+VERSION ?= 0.15.01
+NAME ?= "openrmf-api-report"
 AUTHOR ?= "Dale Bingham"
 PORT_EXT ?= 8084
 PORT_INT ?= 8084
