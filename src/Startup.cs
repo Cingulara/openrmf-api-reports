@@ -11,7 +11,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Prometheus;
 using OpenTracing;
 using OpenTracing.Util;
@@ -25,6 +26,8 @@ namespace openrmf_report_api
 {
     public class Startup
     {
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -36,11 +39,13 @@ namespace openrmf_report_api
         public void ConfigureServices(IServiceCollection services)
         {
             // Register the database components
-            services.Configure<Settings>(options =>
-            {
-                options.ConnectionString = Environment.GetEnvironmentVariable("REPORTMONGODBCONNECTION");
-                options.Database = Environment.GetEnvironmentVariable("REPORTMONGODB");
-            });
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DBTYPE")) || Environment.GetEnvironmentVariable("DBTYPE").ToLower() == "mongo") {
+                services.Configure<Settings>(options =>
+                {
+                    options.ConnectionString = Environment.GetEnvironmentVariable("DBCONNECTION");
+                    options.Database = Environment.GetEnvironmentVariable("DB");
+                });
+            }
             
             // Use "OpenTracing.Contrib.NetCore" to automatically generate spans for ASP.NET Core
             services.AddSingleton<ITracer>(serviceProvider =>  
@@ -62,13 +67,13 @@ namespace openrmf_report_api
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "OpenRMF Report API", Version = "v1", 
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "OpenRMF Report API", Version = "v1", 
                     Description = "The Report API that goes with the OpenRMF tool",
-                    Contact = new Contact
+                    Contact = new OpenApiContact
                     {
                         Name = "Dale Bingham",
                         Email = "dale.bingham@cingulara.com",
-                        Url = "https://github.com/Cingulara/openrmf-api-report"
+                        Url = new Uri("https://github.com/Cingulara/openrmf-api-report")
                     } });
             });
 
@@ -113,31 +118,24 @@ namespace openrmf_report_api
                 options.AddPolicy("Assessor", policy => policy.RequireRole("roles", "[Assessor]"));
             });
 
-            // ********************
-            // USE CORS
-            // ********************
+            // add the CORS setup
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll",
+                options.AddPolicy(name: MyAllowSpecificOrigins,
                     builder =>
                     {
-                        builder
-                        .AllowAnyOrigin() 
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
+                        builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
                     });
             });
 
             // add service for allowing caching of responses
             services.AddResponseCaching();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-                .AddXmlSerializerFormatters();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             // Custom Metrics to count requests for each endpoint and the method
             var counter = Metrics.CreateCounter("openrmf_report_api_path_counter", "Counts requests to OpenRMF endpoints", new CounterConfiguration
@@ -171,18 +169,20 @@ namespace openrmf_report_api
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "OpenRMF Read API V1");
             });
-
-            // ********************
-            // USE CORS
-            // ********************
-            app.UseCors("AllowAll");
             
             // allow response caching directives in the API Controllers
             app.UseResponseCaching();
-            
-            app.UseAuthentication();
+                        
             app.UseHttpsRedirection();
-            app.UseMvc();
+            app.UseRouting();
+            app.UseCors(MyAllowSpecificOrigins);
+            // this has to go here
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
