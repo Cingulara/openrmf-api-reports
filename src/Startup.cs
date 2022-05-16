@@ -72,7 +72,7 @@ namespace openrmf_report_api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "OpenRMF Report API", Version = "v1", 
-                    Description = "The Report API that goes with the OpenRMF tool",
+                    Description = "The Report API that goes with the OpenRMF OSS Application",
                     Contact = new OpenApiContact
                     {
                         Name = "Dale Bingham",
@@ -117,6 +117,7 @@ namespace openrmf_report_api
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("Administrator", policy => policy.RequireRole("roles", "[Administrator]"));
+                options.AddPolicy("Download", policy => policy.RequireRole("roles", "[Download]"));
                 options.AddPolicy("Editor", policy => policy.RequireRole("roles", "[Editor]"));
                 options.AddPolicy("Reader", policy => policy.RequireRole("roles", "[Reader]"));
                 options.AddPolicy("Assessor", policy => policy.RequireRole("roles", "[Assessor]"));
