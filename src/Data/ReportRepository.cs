@@ -37,7 +37,7 @@ namespace openrmf_report_api.Data {
                 return await _context.ACASScanReports.Find(data => data.systemGroupId == id).ToListAsync();
         }
         public async Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityData(string systemGroupId, string vulnid){
-                return await _context.VulnerabilityReports.Find(v => v.vulnid == vulnid && v.systemGroupId == systemGroupId).ToListAsync();
+            return await _context.VulnerabilityReports.Find(v => v.vulnid.Contains(vulnid) && v.systemGroupId == systemGroupId).ToListAsync();
         }
 
         // check that the database is responding and it returns at least one collection name
