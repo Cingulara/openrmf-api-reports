@@ -11,6 +11,7 @@ namespace openrmf_report_api.Data {
     {
         Task<IEnumerable<NessusPatchData>> GetPatchDataBySystem(string id);
         Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityData(string systemGroupId, string vulnid);
+        Task<List<VulnerabilityReport>> GetSystemVulnerabilityData(string systemGroupId, List<string> severity, List<string> status);
         bool HealthStatus();
     }
 }

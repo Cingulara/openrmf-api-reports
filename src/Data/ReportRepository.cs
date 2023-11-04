@@ -36,8 +36,17 @@ namespace openrmf_report_api.Data {
         {
                 return await _context.ACASScanReports.Find(data => data.systemGroupId == id).ToListAsync();
         }
+
         public async Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityData(string systemGroupId, string vulnid){
             return await _context.VulnerabilityReports.Find(v => v.vulnid.Contains(vulnid) && v.systemGroupId == systemGroupId).ToListAsync();
+        }
+
+        public async Task<List<VulnerabilityReport>> GetSystemVulnerabilityData(string systemGroupId, List<string> severity, List<string> status) {
+            var filter = Builders<VulnerabilityReport>.Filter.Eq(x => x.systemGroupId, systemGroupId); // match on system group Id
+            filter = filter & Builders<VulnerabilityReport>.Filter.In(x => x.status, status); // status has to be in the listing
+            filter = filter & Builders<VulnerabilityReport>.Filter.In(x => x.severity, severity); // severity has to be in the listing
+            var query = _context.VulnerabilityReports.AsQueryable().Where(_ => filter.Inject());
+            return await query.ToListAsync();
         }
 
         // check that the database is responding and it returns at least one collection name
