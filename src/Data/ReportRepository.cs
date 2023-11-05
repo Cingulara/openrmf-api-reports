@@ -49,6 +49,14 @@ namespace openrmf_report_api.Data {
             return await query.ToListAsync();
         }
 
+        public async Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityOverrideData(string systemGroupId) {
+            
+            var filter = Builders<VulnerabilityReport>.Filter.Eq(x => x.systemGroupId, systemGroupId);
+            filter = filter & Builders<VulnerabilityReport>.Filter.Ne(x => x.severityOverride, ""); // severity override is filled in
+            filter = filter & Builders<VulnerabilityReport>.Filter.Ne(x => x.severityOverride, null); // severity override is filled in
+            return await _context.VulnerabilityReports.Find(filter).ToListAsync();
+        }
+
         // check that the database is responding and it returns at least one collection name
         public bool HealthStatus(){
             var result = _context.ACASScanReports.Database.ListCollectionNamesAsync().GetAwaiter().GetResult().FirstOrDefault();

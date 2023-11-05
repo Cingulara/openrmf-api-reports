@@ -835,7 +835,42 @@ namespace openrmf_report_api.Controllers
                 return BadRequest();
             }
         }
+
+        /// <summary>
+        /// GET The list of hostnames and vulnerability data from a passed in system id that
+        /// has override settings set
+        /// </summary>
+        /// <param name="systemGroupId">The ID of the system to use</param>
+        /// <returns>
+        /// HTTP Status showing data was found or that there is an error. And the listing of data 
+        /// for the vulnerability report
+        /// </returns>
+        /// <response code="200">Returns the listing of vulnerability report records</response>
+        /// <response code="400">If the item did not query correctly</response>
+        /// <response code="404">If the ID passed is not a valid system</response>
+        [HttpGet("system/{systemGroupId}/override")]
+        [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
+        public async Task<IActionResult> GetSystemByVulnerabilityByOverrideReport(string systemGroupId)
+        {
+
+            try {
+                _logger.LogInformation("Calling GetSystemByVulnerabilityByOverrideReport(system: {0})", systemGroupId);
+               
+                IEnumerable<VulnerabilityReport> vulnerabilities =  await _reportRepo.GetChecklistVulnerabilityOverrideData(systemGroupId);
+                if (vulnerabilities == null) {
+                    _logger.LogWarning("Calling GetSystemByVulnerabilityByOverrideReport(system: {0}) returned no checklist vulnerabilities with override", systemGroupId);
+                    return Ok(new List<VulnerabilityReport>());
+                }
+                _logger.LogInformation("Called GetSystemByVulnerabilityByOverrideReport(system: {0}) successfully", systemGroupId);
+                return Ok(vulnerabilities);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "GetSystemByVulnerabilityByOverrideReport() Error listing all checklist vulnerabilities with override for system package: {0}", systemGroupId);
+                return BadRequest();
+            }
+        }
                 
+
         /// <summary>
         /// PUT Refresh data for reports that are eventual consistency
         /// </summary>
