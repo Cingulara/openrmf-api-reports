@@ -719,7 +719,6 @@ namespace openrmf_report_api.Controllers
         /// <response code="404">If the ID passed in does not have a valid Nessus file</response>
         [HttpGet("system/{systemGroupId}/acaspatchdata")]
         [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
-        [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"systemGroupId"})]
         public async Task<IActionResult> GetNessusPatchDataForReport(string systemGroupId)
         {
             if (!string.IsNullOrEmpty(systemGroupId)) {
@@ -759,7 +758,6 @@ namespace openrmf_report_api.Controllers
         /// <response code="404">If the ID passed is not a valid system</response>
         [HttpGet("system/{systemGroupId}/vulnid/{vulnid}")]
         [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
-        [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"systemGroupId", "vulnid"})]
         public async Task<IActionResult> GetSystemByVulnerabilityForReport(string systemGroupId, string vulnid)
         {
             if (!string.IsNullOrEmpty(systemGroupId) || !string.IsNullOrEmpty(vulnid)) {
@@ -805,7 +803,6 @@ namespace openrmf_report_api.Controllers
         /// <response code="404">If the ID passed is not a valid system</response>
         [HttpGet("system/{systemGroupId}")]
         [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
-        [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"systemGroupId","naf","open","na","nr","cat1","cat2","cat3"})]
         public async Task<IActionResult> GetSystemByVulnerabilityByStatusSeverityForReport(string systemGroupId, bool naf = true, bool open = true, bool na = true, 
             bool nr = true, bool cat1 = true, bool cat2 = true, bool cat3 = true)
         {
