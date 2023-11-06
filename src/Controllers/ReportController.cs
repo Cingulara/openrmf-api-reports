@@ -719,7 +719,6 @@ namespace openrmf_report_api.Controllers
         /// <response code="404">If the ID passed in does not have a valid Nessus file</response>
         [HttpGet("system/{systemGroupId}/acaspatchdata")]
         [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
-        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"systemGroupId"})]
         public async Task<IActionResult> GetNessusPatchDataForReport(string systemGroupId)
         {
             if (!string.IsNullOrEmpty(systemGroupId)) {
@@ -759,7 +758,6 @@ namespace openrmf_report_api.Controllers
         /// <response code="404">If the ID passed is not a valid system</response>
         [HttpGet("system/{systemGroupId}/vulnid/{vulnid}")]
         [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
-        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"systemGroupId", "vulnid"})]
         public async Task<IActionResult> GetSystemByVulnerabilityForReport(string systemGroupId, string vulnid)
         {
             if (!string.IsNullOrEmpty(systemGroupId) || !string.IsNullOrEmpty(vulnid)) {
@@ -767,14 +765,14 @@ namespace openrmf_report_api.Controllers
                     _logger.LogInformation("Calling GetSystemByVulnerabilityForReport(system: {0}, vulnid: {1})", systemGroupId, vulnid);
                     IEnumerable<VulnerabilityReport> vulnerabilities =  await _reportRepo.GetChecklistVulnerabilityData(systemGroupId, vulnid);
                     if (vulnerabilities == null) {
-                        _logger.LogWarning("Calling GetSystemByVulnerabilityForReport(system: {0}, vulnid: {1}) returned no checklists", systemGroupId, vulnid  );
+                        _logger.LogWarning("Calling GetSystemByVulnerabilityForReport(system: {0}, vulnid: {1}) returned no checklist vulnerabilities", systemGroupId, vulnid  );
                         return NotFound();
                     }
                     _logger.LogInformation("Called GetSystemByVulnerabilityForReport(system: {0}, vulnid: {1}) successfully", systemGroupId, vulnid);
                     return Ok(vulnerabilities);
                 }
                 catch (Exception ex) {
-                    _logger.LogError(ex, "GetSystemByVulnerabilityForReport() Error listing all checklists for system: {0}, vulnid: {1}", systemGroupId, vulnid);
+                    _logger.LogError(ex, "GetSystemByVulnerabilityForReport() Error listing all checklist vulnerabilities for system: {0}, vulnid: {1}", systemGroupId, vulnid);
                     return BadRequest();
                 }
             }
@@ -783,8 +781,96 @@ namespace openrmf_report_api.Controllers
                 return BadRequest(); // no systemGroupId or vulnId entered
             }
         }
-        
-        
+
+        /// <summary>
+        /// GET The list of hostnames and vulnerability data from a passed in system id and
+        /// status and severity checks
+        /// </summary>
+        /// <param name="systemGroupId">The ID of the system to use</param>
+        /// <param name="naf">Optional: Include Not a Finding items</param>
+        /// <param name="open">IOptional: nclude Open Items</param>
+        /// <param name="na">Optional: Include Not Applicable Items</param>
+        /// <param name="nr">Optional: Include Not Reviewed Items</param>
+        /// <param name="cat1">Optional: Include Category 1 (High) Items</param>
+        /// <param name="cat2">Optional: Include Category 2 (Medium) Items</param>
+        /// <param name="cat3">Optional: Include Category 3 (Low) Items</param>
+        /// <returns>
+        /// HTTP Status showing data was found or that there is an error. And the listing of data 
+        /// for the vulnerability report
+        /// </returns>
+        /// <response code="200">Returns the listing of vulnerability report records</response>
+        /// <response code="400">If the item did not query correctly</response>
+        /// <response code="404">If the ID passed is not a valid system</response>
+        [HttpGet("system/{systemGroupId}")]
+        [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
+        public async Task<IActionResult> GetSystemByVulnerabilityByStatusSeverityForReport(string systemGroupId, bool naf = true, bool open = true, bool na = true, 
+            bool nr = true, bool cat1 = true, bool cat2 = true, bool cat3 = true)
+        {
+
+            try {
+                _logger.LogInformation("Calling GetSystemByVulnerabilityByStatusSeverityForReport(system: {0})", systemGroupId);
+                // fill the datatable response required
+                // get the categories together
+                List<string> categories = new List<string>();
+                if (cat1) categories.Add("high");
+                if (cat2) categories.Add("medium");
+                if (cat3) categories.Add("low");
+                // get the statuses together
+                List<string> statuses = new List<string>();
+                if (open) statuses.Add("Open");
+                if (na) statuses.Add("Not_Applicable");
+                if (naf) statuses.Add("NotAFinding");
+                if (nr) statuses.Add("Not_Reviewed");
+                
+                List<VulnerabilityReport> vulnerabilities =  await _reportRepo.GetSystemVulnerabilityData(systemGroupId, categories, statuses);
+                if (vulnerabilities == null) {
+                    _logger.LogWarning("Calling GetSystemByVulnerabilityByStatusSeverityForReport(system: {0}) returned no checklist vulnerabilities", systemGroupId);
+                    return Ok(new List<VulnerabilityReport>());
+                }
+                _logger.LogInformation("Called GetSystemByVulnerabilityByStatusSeverityForReport(system: {0}) successfully", systemGroupId);
+                return Ok(vulnerabilities);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "GetSystemByVulnerabilityByStatusSeverityForReport() Error listing all checklist vulnerabilities for system: {0}", systemGroupId);
+                return BadRequest();
+            }
+        }
+
+        /// <summary>
+        /// GET The list of hostnames and vulnerability data from a passed in system id that
+        /// has override settings set
+        /// </summary>
+        /// <param name="systemGroupId">The ID of the system to use</param>
+        /// <returns>
+        /// HTTP Status showing data was found or that there is an error. And the listing of data 
+        /// for the vulnerability report
+        /// </returns>
+        /// <response code="200">Returns the listing of vulnerability report records</response>
+        /// <response code="400">If the item did not query correctly</response>
+        /// <response code="404">If the ID passed is not a valid system</response>
+        [HttpGet("system/{systemGroupId}/override")]
+        [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
+        public async Task<IActionResult> GetSystemByVulnerabilityByOverrideReport(string systemGroupId)
+        {
+
+            try {
+                _logger.LogInformation("Calling GetSystemByVulnerabilityByOverrideReport(system: {0})", systemGroupId);
+               
+                IEnumerable<VulnerabilityReport> vulnerabilities =  await _reportRepo.GetChecklistVulnerabilityOverrideData(systemGroupId);
+                if (vulnerabilities == null) {
+                    _logger.LogWarning("Calling GetSystemByVulnerabilityByOverrideReport(system: {0}) returned no checklist vulnerabilities with override", systemGroupId);
+                    return Ok(new List<VulnerabilityReport>());
+                }
+                _logger.LogInformation("Called GetSystemByVulnerabilityByOverrideReport(system: {0}) successfully", systemGroupId);
+                return Ok(vulnerabilities);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "GetSystemByVulnerabilityByOverrideReport() Error listing all checklist vulnerabilities with override for system package: {0}", systemGroupId);
+                return BadRequest();
+            }
+        }
+                
+
         /// <summary>
         /// PUT Refresh data for reports that are eventual consistency
         /// </summary>
