@@ -869,38 +869,6 @@ namespace openrmf_report_api.Controllers
                 return BadRequest();
             }
         }
-                
-
-        /// <summary>
-        /// PUT Refresh data for reports that are eventual consistency
-        /// </summary>
-        /// <param name="datatype">If passed, the type of report to refresh. If absent, refresh all.</param>
-        /// <returns>
-        /// HTTP Status showing the command was issued or that there is an error.
-        /// </returns>
-        /// <response code="200">Returns the command was issued</response>
-        [HttpPut("reloaddata")]
-        [Authorize(Roles = "Administrator")]
-        public IActionResult ReloadReportData(string datatype)
-        {
-            try {
-                _logger.LogInformation("Calling ReloadReportData(datatype: {0})", datatype);
-                if (string.IsNullOrEmpty(datatype) || datatype.ToLower() == "nessusacas") {
-                    NATSClient.RefreshNessusACASData();
-                    _logger.LogWarning("Calling ReloadReportData(datatype: {0}) to reload Nessus Patch Data successfully.", datatype);
-                }
-                if (string.IsNullOrEmpty(datatype) || datatype.ToLower() == "vulnerability") {
-                    NATSClient.RefreshVulnerabilityData();
-                    _logger.LogWarning("Calling ReloadReportData(datatype: {0}) to reload all Checklist Vulnerability Data successfully.", datatype);
-                }
-                return Ok();
-            }
-            catch (Exception ex) {
-                _logger.LogError(ex, "ReloadReportData() Error listing all checklists for datatype: {0}", datatype);
-                return BadRequest();
-            }
-        }
-
         #endregion
     }
 }
