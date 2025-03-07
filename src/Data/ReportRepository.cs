@@ -57,6 +57,16 @@ namespace openrmf_report_api.Data {
             return await _context.VulnerabilityReports.Find(filter).ToListAsync();
         }
 
+        public async Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityMissingKeyData(string systemGroupId) {
+            
+            // var filter = Builders<VulnerabilityReport>.Filter.Eq(x => x.systemGroupId, systemGroupId);
+            // filter = filter & Builders<VulnerabilityReport>.Filter.Eq(x => x.comments, ""); // comments field empty
+            // filter = filter & Builders<VulnerabilityReport>.Filter.Eq(x => x.details, ""); // finding details field empty
+            return await _context.VulnerabilityReports.Find(x => x.systemGroupId == systemGroupId && 
+                string.IsNullOrEmpty(x.comments) && string.IsNullOrEmpty(x.details) && 
+                (x.status.ToLower() == "notafinding" || x.status.ToLower() == "not_applicable")).ToListAsync();
+        }
+
         // check that the database is responding and it returns at least one collection name
         public bool HealthStatus(){
             var result = _context.ACASScanReports.Database.ListCollectionNamesAsync().GetAwaiter().GetResult().FirstOrDefault();

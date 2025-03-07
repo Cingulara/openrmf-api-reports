@@ -869,6 +869,31 @@ namespace openrmf_report_api.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet("system/{systemGroupId}/missingdata")]
+        [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
+        public async Task<IActionResult> GetSystemByVulnerabilityByMissingData(string systemGroupId)
+        {
+
+            try {
+                _logger.LogInformation("Calling GetSystemByVulnerabilityByMissingData(system: {0})", systemGroupId);
+               
+                IEnumerable<VulnerabilityReport> vulnerabilities =  await _reportRepo.GetChecklistVulnerabilityMissingKeyData(systemGroupId);
+                if (vulnerabilities == null) {
+                    _logger.LogWarning("Calling GetSystemByVulnerabilityByOverriGetSystemByVulnerabilityByMissingDatadeReport(system: {0}) returned no checklist vulnerabilities with override", systemGroupId);
+                    return Ok(new List<VulnerabilityReport>());
+                }
+                _logger.LogInformation("Called GetSystemByVulnerabilityByMissingData(system: {0}) successfully", systemGroupId);
+                return Ok(vulnerabilities);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "GetSystemByVulnerabilityByMissingData() Error listing all checklist vulnerabilities with override for system package: {0}", systemGroupId);
+                return BadRequest();
+            }
+        }
+
+        
+
         #endregion
     }
 }
