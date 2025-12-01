@@ -7,7 +7,7 @@
     <ProjectGuid>{d39aae65-c42e-4761-81ef-516c83f8560e}</ProjectGuid>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
-    <Version>1.13.00</Version>
+    <Version>1.14.00</Version>
     <InformationalVersion>This is the OpenRMF OSS Application Report API from Cingulara</InformationalVersion>
   </PropertyGroup>
 
@@ -23,7 +23,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="mongodb.driver" Version="2.30.0" />
+    <PackageReference Include="mongodb.driver" Version="3.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NLog" Version="5.3.4" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.14" />
