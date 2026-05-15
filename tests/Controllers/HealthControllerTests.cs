@@ -1,44 +1,69 @@
-using System;
 using Xunit;
 using openrmf_report_api.Controllers;
 using openrmf_report_api.Data;
 using Moq;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Cors.Infrastructure;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Http;
 
 namespace tests.Controllers
 {
-
     public class HealthControllerTests
     {
         private readonly Mock<ILogger<HealthController>> _mockLogger;
-        private readonly Mock<IReportRepository> _mocksystemGroupRepo;
-        private readonly HealthController _healthController; 
+        private readonly Mock<IReportRepository> _mockReportRepo;
+        private readonly HealthController _healthController;
 
-        public HealthControllerTests() {
+        public HealthControllerTests()
+        {
             _mockLogger = new Mock<ILogger<HealthController>>();
-            _mocksystemGroupRepo = new Mock<IReportRepository>();
-            _healthController = new HealthController(_mocksystemGroupRepo.Object, _mockLogger.Object);
+            _mockReportRepo = new Mock<IReportRepository>();
+            _healthController = new HealthController(_mockReportRepo.Object, _mockLogger.Object);
+        }
+
+        // ---- Pass Tests ----
+
+        [Fact]
+        public void Test_HealthControllerIsNotNull()
+        {
+            Assert.NotNull(_healthController);
         }
 
         [Fact]
-        public void Test_HealthControllerIsValid()
+        public void Test_HealthControllerGetReturnsOkWhenHealthy()
         {
-            Assert.True(_healthController != null);
-        }
-
-        [Fact]
-        public void Test_HealthControllerGetIsValid()
-        {
+            _mockReportRepo.Setup(r => r.HealthStatus()).Returns(true);
             var result = _healthController.Get();
-            _mocksystemGroupRepo.Setup(e => e.HealthStatus()).Returns(true);
-            Assert.True(_healthController != null);
-            //Assert.Equal(200, ((Microsoft.AspNetCore.Mvc.ObjectResult)result.Result).StatusCode); // returns a status code HTTP 200
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Equal("ok", okResult.Value);
+        }
+
+        [Fact]
+        public void Test_HealthControllerGetResultIsNotNullWhenHealthy()
+        {
+            _mockReportRepo.Setup(r => r.HealthStatus()).Returns(true);
+            var result = _healthController.Get();
+            Assert.NotNull(result);
+        }
+
+        // ---- Fail / Negative Tests ----
+
+        [Fact]
+        public void Test_HealthControllerGetReturnsBadRequestWhenUnhealthy()
+        {
+            _mockReportRepo.Setup(r => r.HealthStatus()).Returns(false);
+            var result = _healthController.Get();
+            var badResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal(400, badResult.StatusCode);
+        }
+
+        [Fact]
+        public void Test_HealthControllerGetReturnsBadRequestOnException()
+        {
+            _mockReportRepo.Setup(r => r.HealthStatus()).Throws(new System.Exception("DB connection failure"));
+            var result = _healthController.Get();
+            var badResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal(400, badResult.StatusCode);
         }
     }
 }
