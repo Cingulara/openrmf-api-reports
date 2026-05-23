@@ -1,4 +1,4 @@
-// Copyright (c) Cingulara LLC 2019 and Tutela LLC 2019. All rights reserved.
+// Copyright (c) Cingulara LLC 2025 and Tutela LLC 2025. All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007 license. See LICENSE file in the project root for full license information.
 
 using openrmf_report_api.Models;
@@ -55,6 +55,16 @@ namespace openrmf_report_api.Data {
             filter = filter & Builders<VulnerabilityReport>.Filter.Ne(x => x.severityOverride, ""); // severity override is filled in
             filter = filter & Builders<VulnerabilityReport>.Filter.Ne(x => x.severityOverride, null); // severity override is filled in
             return await _context.VulnerabilityReports.Find(filter).ToListAsync();
+        }
+
+        public async Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityMissingKeyData(string systemGroupId) {
+            
+            // var filter = Builders<VulnerabilityReport>.Filter.Eq(x => x.systemGroupId, systemGroupId);
+            // filter = filter & Builders<VulnerabilityReport>.Filter.Eq(x => x.comments, ""); // comments field empty
+            // filter = filter & Builders<VulnerabilityReport>.Filter.Eq(x => x.details, ""); // finding details field empty
+            return await _context.VulnerabilityReports.Find(x => x.systemGroupId == systemGroupId && 
+                string.IsNullOrEmpty(x.comments) && string.IsNullOrEmpty(x.details) && 
+                (x.status.ToLower() == "notafinding" || x.status.ToLower() == "not_applicable")).ToListAsync();
         }
 
         // check that the database is responding and it returns at least one collection name

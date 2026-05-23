@@ -4,15 +4,17 @@ using System;
 
 namespace tests.Models
 {
-    public class ArtifactTests
+    public class NessusPatchDataTests
     {
+        // ---- Pass Tests ----
+
         [Fact]
         public void Test_NewNessusPatchDataIsValid()
         {
             NessusPatchData data = new NessusPatchData();
-            Assert.True(data != null);
+            Assert.NotNull(data);
         }
-    
+
         [Fact]
         public void Test_NessusPatchDataWithDataIsValid()
         {
@@ -37,27 +39,94 @@ namespace tests.Models
             data.pluginType = "My Plugin Type";
             data.riskFactor = "My Risk";
             data.synopsis = "My synopsis";
+            data.scanVersion = "6.11.1";
 
-            // test things out
-            Assert.True(data != null);
-            Assert.True (!string.IsNullOrEmpty(data.created.ToShortDateString()));
-            Assert.True (!string.IsNullOrEmpty(data.systemGroupId));
-            Assert.True (!string.IsNullOrEmpty(data.hostname));
-            Assert.True (!string.IsNullOrEmpty(data.reportName));
-            Assert.True (!string.IsNullOrEmpty(data.operatingSystem));
-            Assert.True (!string.IsNullOrEmpty(data.systemType));
-            Assert.True (!string.IsNullOrEmpty(data.ipAddress));
-            Assert.True (!string.IsNullOrEmpty(data.pluginId));
-            Assert.True (!string.IsNullOrEmpty(data.pluginName));
-            Assert.True (!string.IsNullOrEmpty(data.family));
-            Assert.True (!string.IsNullOrEmpty(data.description));
-            Assert.True (!string.IsNullOrEmpty(data.publicationDate));
-            Assert.True (!string.IsNullOrEmpty(data.pluginType));
-            Assert.True (!string.IsNullOrEmpty(data.riskFactor));
-            Assert.True (!string.IsNullOrEmpty(data.synopsis));
-            Assert.True (data.severityName == "Critical");
-            Assert.True (data.updatedOn.HasValue);
-            Assert.True (!string.IsNullOrEmpty(data.updatedOn.Value.ToShortDateString()));
+            Assert.NotNull(data);
+            Assert.NotEmpty(data.created.ToShortDateString());
+            Assert.NotEmpty(data.systemGroupId);
+            Assert.NotEmpty(data.hostname);
+            Assert.NotEmpty(data.reportName);
+            Assert.NotEmpty(data.operatingSystem);
+            Assert.NotEmpty(data.systemType);
+            Assert.NotEmpty(data.ipAddress);
+            Assert.True(data.credentialed);
+            Assert.NotEmpty(data.pluginId);
+            Assert.NotEmpty(data.pluginName);
+            Assert.NotEmpty(data.family);
+            Assert.Equal(4, data.severity);
+            Assert.Equal(2, data.hostTotal);
+            Assert.Equal(3, data.total);
+            Assert.NotEmpty(data.description);
+            Assert.NotEmpty(data.publicationDate);
+            Assert.NotEmpty(data.pluginType);
+            Assert.NotEmpty(data.riskFactor);
+            Assert.NotEmpty(data.synopsis);
+            Assert.Equal("Critical", data.severityName);
+            Assert.True(data.updatedOn.HasValue);
+            Assert.NotEmpty(data.updatedOn.Value.ToShortDateString());
+        }
+
+        [Theory]
+        [InlineData(4, "Critical")]
+        [InlineData(3, "High")]
+        [InlineData(2, "Medium")]
+        [InlineData(1, "Low")]
+        [InlineData(0, "Informational")]
+        public void Test_SeverityNameReturnsCorrectLabel(int severityValue, string expectedLabel)
+        {
+            NessusPatchData data = new NessusPatchData { severity = severityValue };
+            Assert.Equal(expectedLabel, data.severityName);
+        }
+
+        [Fact]
+        public void Test_PluginIdSortPadsShortId()
+        {
+            NessusPatchData data = new NessusPatchData { pluginId = "123" };
+            Assert.Equal("0123", data.pluginIdSort);
+        }
+
+        [Fact]
+        public void Test_PluginIdSortDoesNotPadLongId()
+        {
+            NessusPatchData data = new NessusPatchData { pluginId = "123456" };
+            Assert.Equal("123456", data.pluginIdSort);
+        }
+
+        [Fact]
+        public void Test_UpdatedOnNullableIsNullByDefault()
+        {
+            NessusPatchData data = new NessusPatchData();
+            Assert.False(data.updatedOn.HasValue);
+        }
+
+        [Fact]
+        public void Test_CredentialedDefaultIsFalse()
+        {
+            NessusPatchData data = new NessusPatchData();
+            Assert.False(data.credentialed);
+        }
+
+        // ---- Fail / Negative Tests ----
+
+        [Fact]
+        public void Test_SeverityNameIsNotCriticalForLowSeverity()
+        {
+            NessusPatchData data = new NessusPatchData { severity = 1 };
+            Assert.NotEqual("Critical", data.severityName);
+        }
+
+        [Fact]
+        public void Test_SystemGroupIdIsNullByDefault()
+        {
+            NessusPatchData data = new NessusPatchData();
+            Assert.Null(data.systemGroupId);
+        }
+
+        [Fact]
+        public void Test_HostnameIsNullByDefault()
+        {
+            NessusPatchData data = new NessusPatchData();
+            Assert.Null(data.hostname);
         }
     }
 }

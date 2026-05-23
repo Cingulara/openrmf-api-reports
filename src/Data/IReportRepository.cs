@@ -1,4 +1,4 @@
-// Copyright (c) Cingulara LLC 2019 and Tutela LLC 2019. All rights reserved.
+// Copyright (c) Cingulara LLC 2025 and Tutela LLC 2025. All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007 license. See LICENSE file in the project root for full license information.
 
 using openrmf_report_api.Models;
@@ -13,6 +13,7 @@ namespace openrmf_report_api.Data {
         Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityData(string systemGroupId, string vulnid);
         Task<List<VulnerabilityReport>> GetSystemVulnerabilityData(string systemGroupId, List<string> severity, List<string> status);
         Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityOverrideData(string systemGroupId);
+        Task<IEnumerable<VulnerabilityReport>> GetChecklistVulnerabilityMissingKeyData(string systemGroupId);
         bool HealthStatus();
     }
 }

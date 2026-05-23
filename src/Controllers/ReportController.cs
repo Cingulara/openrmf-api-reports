@@ -1,4 +1,4 @@
-﻿// Copyright (c) Cingulara LLC 2019 and Tutela LLC 2019. All rights reserved.
+﻿// Copyright (c) Cingulara LLC 2025 and Tutela LLC 2025. All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007 license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -869,6 +869,31 @@ namespace openrmf_report_api.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet("system/{systemGroupId}/missingdata")]
+        [Authorize(Roles = "Administrator,Reader,Editor,Assessor")]
+        public async Task<IActionResult> GetSystemByVulnerabilityByMissingData(string systemGroupId)
+        {
+
+            try {
+                _logger.LogInformation("Calling GetSystemByVulnerabilityByMissingData(system: {0})", systemGroupId);
+               
+                IEnumerable<VulnerabilityReport> vulnerabilities =  await _reportRepo.GetChecklistVulnerabilityMissingKeyData(systemGroupId);
+                if (vulnerabilities == null) {
+                    _logger.LogWarning("Calling GetSystemByVulnerabilityByOverriGetSystemByVulnerabilityByMissingDatadeReport(system: {0}) returned no checklist vulnerabilities with override", systemGroupId);
+                    return Ok(new List<VulnerabilityReport>());
+                }
+                _logger.LogInformation("Called GetSystemByVulnerabilityByMissingData(system: {0}) successfully", systemGroupId);
+                return Ok(vulnerabilities);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "GetSystemByVulnerabilityByMissingData() Error listing all checklist vulnerabilities with override for system package: {0}", systemGroupId);
+                return BadRequest();
+            }
+        }
+
+        
+
         #endregion
     }
 }
